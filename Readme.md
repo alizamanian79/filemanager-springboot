@@ -1,147 +1,122 @@
-# FileManager Component README
+Here's a comprehensive README for your `FileManager` class, which provides an overview of its functionality, usage, and methods:
 
-## Overview
+---
 
-The `FileManager` class provides a set of methods to manage file operations such as uploading, selecting, updating, deleting, and downloading files in a Spring Boot application. It utilizes Base64 encoding for file uploads and downloads, making it suitable for handling image files and other binary data.
+# FileManager
 
-## Package Structure
+The `FileManager` class is a utility component for managing file uploads, downloads, selections, and deletions in a Spring Boot application. It supports handling files in Base64 format, ensuring file size limits, and providing responses for various file operations.
 
-```plaintext
-com.example.server.utill
-    └── FileManager.java
-```
+## Table of Contents
+- [Features](#features)
+- [Dependencies](#dependencies)
+- [Usage](#usage)
+- [Methods](#methods)
+  - [uploadFile](#uploadfile)
+  - [selectFile](#selectfile)
+  - [deleteFile](#deletefile)
+  - [downloadFile](#downloadfile)
+- [Response Structure](#response-structure)
+- [Error Handling](#error-handling)
+- [License](#license)
+
+## Features
+- Upload files in Base64 format with automatic file type detection.
+- Limit file size to 5MB.
+- Select files and return their content in Base64 format.
+- Delete files from the server.
+- Download files with appropriate headers for file transfer.
 
 ## Dependencies
+This component requires the following dependencies:
+- Spring Boot
+- Lombok
 
-- **Spring Framework**: For creating the component and handling HTTP responses.
-- **Lombok**: For logging and reducing boilerplate code.
+Ensure that you have these dependencies in your `pom.xml` or `build.gradle` file.
 
-## Class Annotations
+## Usage
+To use the `FileManager`, simply autowire it into your Spring service or controller:
 
-- `@Slf4j`: Provides a logger for the class.
-- `@Component`: Indicates that this class is a Spring-managed component.
+```java
+import com.example.server.utill.FileManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class MyService {
+    @Autowired
+    private FileManager fileManager;
+    
+    // Use fileManager methods here
+}
+```
 
 ## Methods
 
-### 1. Upload File
+### `uploadFile(FileManagerRequest request)`
+Uploads a file from a Base64 encoded string. If the file already exists, it updates the file; otherwise, it creates a new one.
 
-```java
-public ResponseEntity<FileManagerResponse> uploadFile(FileManagerRequest request)
-```
+**Parameters:**
+- `FileManagerRequest request`: Contains the Base64 string, optional file name, and file path.
 
-- **Description**: Uploads a file encoded in Base64 format.
-- **Parameters**:
-    - `FileManagerRequest request`: Contains the Base64 string, file path, and optional file name.
-- **Returns**: `ResponseEntity<FileManagerResponse>` with status and message.
+**Returns:**
+- `FileManagerResponse`: Contains status, message, file name, and file path.
 
-**Response Codes**:
-- `200 OK`: File saved successfully.
-- `400 BAD REQUEST`: Invalid Base64 string.
-- `409 CONFLICT`: File already exists.
-- `500 INTERNAL SERVER ERROR`: Error saving file.
+### `selectFile(String filePath)`
+Selects a file by its path.
 
-### 2. Select File
+**Parameters:**
+- `String filePath`: The path of the file to select.
 
-```java
-public ResponseEntity<FileManagerResponse> selectFile(String filePath)
-```
+**Returns:**
+- `FileManagerResponse`: Contains status, message, file name, and file path.
 
-- **Description**: Selects a file based on the provided file path.
-- **Parameters**:
-    - `String filePath`: The path of the file to select.
-- **Returns**: `ResponseEntity<FileManagerResponse>` with file details.
+### `deleteFile(String fileName, String filePath)`
+Deletes a specified file from the server.
 
-**Response Codes**:
-- `200 OK`: File selected successfully.
-- `404 NOT FOUND`: File not found.
+**Parameters:**
+- `String fileName`: The name of the file to delete.
+- `String filePath`: The path where the file is located.
 
-### 3. Update File
+**Returns:**
+- `FileManagerResponse`: Contains status and message regarding the deletion.
 
-```java
-public ResponseEntity<FileManagerResponse> updateFile(FileManagerRequest request)
-```
+### `selectFile(String fileName, String filePath)`
+Selects a file and returns its content in Base64 format.
 
-- **Description**: Updates an existing file with a new Base64 encoded string.
-- **Parameters**:
-    - `FileManagerRequest request`: Contains the Base64 string, file path, and file name.
-- **Returns**: `ResponseEntity<FileManagerResponse>` with status and message.
+**Parameters:**
+- `String fileName`: The name of the file to select.
+- `String filePath`: The path where the file is located.
 
-**Response Codes**:
-- `200 OK`: File updated successfully.
-- `400 BAD REQUEST`: Invalid Base64 string.
-- `404 NOT FOUND`: File not found.
-- `500 INTERNAL SERVER ERROR`: Error updating file.
+**Returns:**
+- `FileManagerResponse`: Contains status, message, Base64 file content, and file path.
 
-### 4. Delete File
+### `downloadFile(String fileName, String filePath)`
+Downloads a file as a byte array.
 
-```java
-public ResponseEntity<FileManagerResponse> deleteFile(String fileName, String filePath)
-```
+**Parameters:**
+- `String fileName`: The name of the file to download.
+- `String filePath`: The path where the file is located.
 
-- **Description**: Deletes a specified file.
-- **Parameters**:
-    - `String fileName`: The name of the file to delete.
-    - `String filePath`: The path where the file is located.
-- **Returns**: `ResponseEntity<FileManagerResponse>` indicating the result of the deletion.
+**Returns:**
+- `ResponseEntity<byte[]>`: Contains the file bytes and HTTP headers for the download.
 
-**Response Codes**:
-- `200 OK`: File deleted successfully.
-- `404 NOT FOUND`: File not found.
-- `500 INTERNAL SERVER ERROR`: Error deleting file.
-
-### 5. Select File (with Base64)
-
-```java
-public ResponseEntity<FileManagerResponse> selectFile(String fileName, String filePath)
-```
-
-- **Description**: Selects a file and returns its content as a Base64 encoded string.
-- **Parameters**:
-    - `String fileName`: The name of the file to select.
-    - `String filePath`: The path where the file is located.
-- **Returns**: `ResponseEntity<FileManagerResponse>` with Base64 encoded content.
-
-**Response Codes**:
-- `200 OK`: File found and returned as Base64.
-- `404 NOT FOUND`: File not found.
-- `500 INTERNAL SERVER ERROR`: Error reading file.
-
-### 6. Download File
-
-```java
-public ResponseEntity<byte[]> downloadFile(String fileName, String filePath)
-```
-
-- **Description**: Downloads a specified file.
-- **Parameters**:
-    - `String fileName`: The name of the file to download.
-    - `String filePath`: The path where the file is located.
-- **Returns**: `ResponseEntity<byte[]>` containing the file bytes.
-
-**Response Codes**:
-- `200 OK`: File downloaded successfully.
-- `404 NOT FOUND`: File not found.
-- `500 INTERNAL SERVER ERROR`: Error reading file.
-
-## Usage
-
-To use the `FileManager` component, simply autowire it into your Spring service or controller:
-
-```java
-@Autowired
-private FileManager fileManager;
-```
-
-You can then call the methods as needed:
-
-```java
-ResponseEntity<FileManagerResponse> response = fileManager.uploadFile(request);
-```
+## Response Structure
+The responses from the `FileManager` methods are encapsulated in the `FileManagerResponse` class, which includes:
+- `int status`: HTTP status code.
+- `String message`: Description of the operation result.
+- `String fileName`: Name of the file involved in the operation (if applicable).
+- `String filePath`: Path of the file involved in the operation (if applicable).
 
 ## Error Handling
+The `FileManager` handles various errors, including:
+- Invalid Base64 strings.
+- File size exceeding 5MB.
+- File not found during selection or deletion.
+- IO exceptions during file operations.
 
-The `FileManager` class provides various response codes to indicate the success or failure of operations. Ensure to handle these appropriately in your application to provide a better user experience.
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-## Conclusion
+---
 
-The `FileManager` component is a robust solution for managing file uploads, retrievals, updates, and deletions in a Spring Boot application. By utilizing Base64 encoding, it simplifies the handling of binary data, making it ideal for applications that require file management capabilities.
+Feel free to customize any sections as needed or add additional information relevant to your project!
