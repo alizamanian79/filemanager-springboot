@@ -1,5 +1,7 @@
 package com.example.server.utill.FileManager;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -63,9 +65,9 @@ public class FileManager {
                 }
             }
 
-            // If no extension was found, default to .bin
+            // If no extension was found, return an error
             if (fileExtension.isEmpty()) {
-                fileExtension = "bin"; // Default extension if none provided
+                return new FileManagerResponse(400, "Unsupported file type", null, null);
             }
 
             // Generate the full file path
@@ -74,12 +76,8 @@ public class FileManager {
 
             // Check if the file already exists
             if (file.exists()) {
-                // Update the file
-                try (FileOutputStream fos = new FileOutputStream(fullFilePath)) {
-                    fos.write(decodedBytes);
-                    fos.flush();
-                }
-                return new FileManagerResponse(200, "File updated successfully", fileName + "." + fileExtension, fullFilePath);
+                // Return an error response if the file already exists
+                return new FileManagerResponse(400, "File already exists: " + fileName + "." + fileExtension, fileName + "." + fileExtension, fullFilePath);
             } else {
                 // Upload the file
                 try (FileOutputStream fos = new FileOutputStream(fullFilePath)) {
@@ -181,6 +179,17 @@ public class FileManager {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
+    public static String removeAllFormats(String fileName) {
+        // Check if the file name contains a dot
+        if (fileName != null && fileName.lastIndexOf('.') != -1) {
+            return fileName.substring(0, fileName.lastIndexOf('.')); // Remove everything after the last dot
+        }
+        return fileName; // Return the original if it doesn't contain a dot
+    }
+
 
 
 }
